@@ -81,15 +81,15 @@ describe('Paytm Bus Web App', () => {
             console.log('Found From field with placeholder strategy');
             await fromInput1.click();
             await browser.pause(1000);
-            await fromInput1.setValue('Delhi');
-            console.log('Successfully entered Delhi in From field');
+            await fromInput1.setValue('Bengaluru');
+            console.log('Successfully entered Bengaluru in From field');
             
             // Wait for suggestions to appear and select first one
             await browser.pause(2000);
             console.log('Looking for From field suggestions...');
             
             // Try different selectors for the first suggestion
-            const firstSuggestion = await $('//*[contains(text(), "Search Results")]/following-sibling::*//*[1] | //li[contains(text(), "Delhi")][1] | //*[contains(@class, "suggestion")][1] | //*[contains(@class, "dropdown")]//*[1]');
+            const firstSuggestion = await $('//*[contains(text(), "Search Results")]/following-sibling::*//*[1] | //li[contains(text(), "Bengaluru")][1] | //*[contains(@class, "suggestion")][1] | //*[contains(@class, "dropdown")]//*[1]');
             if (await firstSuggestion.isExisting()) {
               console.log('Found From suggestion, clicking...');
               await firstSuggestion.click();
@@ -112,12 +112,12 @@ describe('Paytm Bus Web App', () => {
               console.log('Trying first input field as From field');
               await firstInput.click();
               await browser.pause(1000);
-              await firstInput.setValue('Delhi');
-              console.log('Successfully entered Delhi in first input field');
+              await firstInput.setValue('Bengaluru');
+              console.log('Successfully entered Bengaluru in first input field');
               
               // Wait for suggestions and select first one
               await browser.pause(2000);
-              const firstSuggestion = await $('//*[contains(text(), "Delhi")][1] | //*[contains(@class, "suggestion")][1]');
+              const firstSuggestion = await $('//*[contains(text(), "Bengaluru")][1] | //*[contains(@class, "suggestion")][1]');
               if (await firstSuggestion.isExisting()) {
                 await firstSuggestion.click();
                 console.log('Selected first suggestion from first input');
@@ -142,12 +142,12 @@ describe('Paytm Bus Web App', () => {
               // Now try to find an active input or input near this element
               const nearbyInput = await $('//*[contains(text(), "From")]/following::input[1] | //*[contains(text(), "From")]/preceding::input[1] | //*[contains(text(), "From")]/..//input');
               if (await nearbyInput.isExisting()) {
-                await nearbyInput.setValue('Delhi');
-                console.log('Successfully entered Delhi via From text click');
+                await nearbyInput.setValue('Bengaluru');
+                console.log('Successfully entered Bengaluru via From text click');
                 
                 // Wait for suggestions and select first one
                 await browser.pause(2000);
-                const firstSuggestion = await $('//*[contains(text(), "Delhi")][1]');
+                const firstSuggestion = await $('//*[contains(text(), "Bengaluru")][1]');
                 if (await firstSuggestion.isExisting()) {
                   await firstSuggestion.click();
                   console.log('Selected suggestion via From text method');
@@ -174,19 +174,19 @@ describe('Paytm Bus Web App', () => {
             console.log('Found To field with placeholder strategy');
             await toInput1.click();
             await browser.pause(1000);
-            await toInput1.setValue('Mumbai');
-            console.log('Successfully entered Mumbai in To field');
+            await toInput1.setValue('Hyderabad');
+            console.log('Successfully entered Hyderabad in To field');
             
             // Wait for suggestions to appear and select first one
             await browser.pause(3000);
             console.log('Looking for To field suggestions...');
             
-            // Look for the first Mumbai option in the search results
-            const firstMumbaiOption = await $('//*[contains(text(), "Mumbai")][1] | //*[contains(text(), "Search Results")]/following-sibling::*//*[contains(text(), "Mumbai")][1]');
+            // Look for the first Hyderabad option in the search results
+            const firstMumbaiOption = await $('//*[contains(text(), "Hyderabad")][1] | //*[contains(text(), "Search Results")]/following-sibling::*//*[contains(text(), "Hyderabad")][1]');
             if (await firstMumbaiOption.isExisting()) {
-              console.log('Found first Mumbai option, clicking...');
+              console.log('Found first Hyderabad option, clicking...');
               await firstMumbaiOption.click();
-              console.log('Selected first Mumbai suggestion');
+              console.log('Selected first Hyderabad suggestion');
             } else {
               // Try alternative selectors for suggestions
               const anySuggestion = await $('//*[contains(@class, "suggestion")][1] | //*[contains(@class, "dropdown")]//*[1] | //li[1]');
@@ -211,15 +211,15 @@ describe('Paytm Bus Web App', () => {
               console.log('Trying second input field as To field');
               await secondInput.click();
               await browser.pause(1000);
-              await secondInput.setValue('Mumbai');
-              console.log('Successfully entered Mumbai in second input field');
+              await secondInput.setValue('Hyderabad');
+              console.log('Successfully entered Hyderabad in second input field');
               
               // Wait for suggestions and select first one
               await browser.pause(3000);
-              const firstSuggestion = await $('//*[contains(text(), "Mumbai")][1]');
+              const firstSuggestion = await $('//*[contains(text(), "Hyderabad")][1]');
               if (await firstSuggestion.isExisting()) {
                 await firstSuggestion.click();
-                console.log('Selected Mumbai suggestion from second input');
+                console.log('Selected Hyderabad suggestion from second input');
               }
               
               toFieldFound = true;
@@ -241,15 +241,15 @@ describe('Paytm Bus Web App', () => {
               // Now try to find an active input or input near this element
               const nearbyInput = await $('//*[contains(text(), "To")]/following::input[1] | //*[contains(text(), "To")]/preceding::input[1] | //*[contains(text(), "To")]/..//input');
               if (await nearbyInput.isExisting()) {
-                await nearbyInput.setValue('Mumbai');
-                console.log('Successfully entered Mumbai via To text click');
+                await nearbyInput.setValue('Hyderabad');
+                console.log('Successfully entered Hyderabad via To text click');
                 
                 // Wait for suggestions and select first one
                 await browser.pause(3000);
-                const firstSuggestion = await $('//*[contains(text(), "Mumbai")][1]');
+                const firstSuggestion = await $('//*[contains(text(), "Hyderabad")][1]');
                 if (await firstSuggestion.isExisting()) {
                   await firstSuggestion.click();
-                  console.log('Selected Mumbai suggestion via To text method');
+                  console.log('Selected Hyderabad suggestion via To text method');
                 }
                 
                 toFieldFound = true;
@@ -908,6 +908,282 @@ describe('Paytm Bus Web App', () => {
       } catch (e) {
         console.log('Final verification failed:', e.message);
       }
+      
+      // === STEP 10: CLICK PROCEED TO PAY ===
+      console.log('=== STEP 10: CLICKING PROCEED TO PAY ===');
+      await browser.pause(2000);
+      
+      try {
+        const proceedToPayButton = await $('//*[contains(text(), "Proceed To Pay")]');
+        if (await proceedToPayButton.isExisting()) {
+          console.log('Found Proceed To Pay button, clicking...');
+          await proceedToPayButton.click();
+          console.log('✅ Proceed To Pay button clicked');
+          
+          // Wait for loader to finish and payment gateway to load completely
+          console.log('⏳ Waiting for loader to finish and payment gateway to load completely...');
+          await browser.pause(8000); // Increased from 5000 to 8000ms for better page loading
+          console.log('✅ Payment gateway should be fully loaded now');
+        } else {
+          console.log('❌ Proceed To Pay button not found');
+        }
+      } catch (e) {
+        console.log('Proceed To Pay button click failed:', e.message);
+      }
+      
+      // === STEP 11: SELECT NET BANKING OPTION ===
+      console.log('=== STEP 11: SELECTING NET BANKING OPTION ===');
+      await browser.pause(3000); // Additional wait before attempting Net Banking selection
+      
+      // Debug: Let's see what payment options are available
+      console.log('=== DEBUGGING PAYMENT OPTIONS ===');
+      try {
+        const paymentOptionsText = await $$('//*[contains(text(), "Payment") or contains(text(), "UPI") or contains(text(), "Net Banking") or contains(text(), "Prepaid")]');
+        console.log(`Found ${paymentOptionsText.length} payment-related text elements`);
+        for (let i = 0; i < Math.min(paymentOptionsText.length, 5); i++) {
+          try {
+            const text = await paymentOptionsText[i].getText();
+            console.log(`Payment element ${i}: "${text}"`);
+          } catch (e) {
+            console.log(`Could not get text for payment element ${i}`);
+          }
+        }
+      } catch (e) {
+        console.log('Debug failed:', e.message);
+      }
+      
+      try {
+        let netBankingClicked = false;
+        
+        // Strategy 1: Try to find and click the complete Net Banking card
+        console.log('Strategy 1: Looking for Net Banking complete card...');
+        const allClickableElements = await $$('//*[contains(text(), "Net Banking")]');
+        console.log(`Found ${allClickableElements.length} elements containing "Net Banking"`);
+        
+        for (let i = 0; i < allClickableElements.length; i++) {
+          try {
+            const element = allClickableElements[i];
+            const isDisplayed = await element.isDisplayed();
+            const isClickable = await element.isClickable();
+            
+            if (isDisplayed && isClickable) {
+              console.log(`Trying to click Net Banking element ${i}...`);
+              await element.click();
+              console.log(`✅ Clicked Net Banking element ${i}`);
+              
+              // Verify if click worked by checking if we're still on same page
+              await browser.pause(2000);
+              const stillOnPaymentPage = await $('//*[contains(text(), "Payment Options")]');
+              if (await stillOnPaymentPage.isExisting()) {
+                console.log(`⚠️ Still on payment page after clicking element ${i} - click may not have worked`);
+              } else {
+                console.log(`✅ Successfully navigated away from payment page with element ${i}`);
+                netBankingClicked = true;
+                break;
+              }
+            } else {
+              console.log(`Element ${i} is not clickable or not displayed`);
+            }
+          } catch (e) {
+            console.log(`Failed to click element ${i}:`, e.message);
+          }
+        }
+        
+        // Strategy 2: Try clicking on the arrow next to Net Banking
+        if (!netBankingClicked) {
+          console.log('Strategy 2: Trying to click on arrow next to Net Banking...');
+          try {
+            // Look for arrow or chevron near Net Banking
+            const netBankingRow = await $('//*[contains(text(), "Net Banking")]/ancestor::*[contains(@class, "row") or contains(@class, "option") or contains(@class, "item")][1]');
+            if (await netBankingRow.isExisting()) {
+              console.log('Found Net Banking row, clicking on it...');
+              await netBankingRow.click();
+              console.log('✅ Net Banking row clicked');
+              
+              // Check if navigation happened
+              await browser.pause(2000);
+              const stillOnPaymentPage = await $('//*[contains(text(), "Payment Options")]');
+              if (!await stillOnPaymentPage.isExisting()) {
+                console.log('✅ Successfully navigated away from payment page');
+                netBankingClicked = true;
+              } else {
+                console.log('⚠️ Still on payment page after row click');
+              }
+            }
+          } catch (e) {
+            console.log('Arrow/row click failed:', e.message);
+          }
+        }
+        
+        // Strategy 3: Try clicking using coordinates in the center of Net Banking area
+        if (!netBankingClicked) {
+          console.log('Strategy 3: Trying coordinate-based click on Net Banking...');
+          try {
+            const netBankingText = await $('//*[contains(text(), "Net Banking")]');
+            if (await netBankingText.isExisting()) {
+              // Get the location and size of the element
+              const location = await netBankingText.getLocation();
+              const size = await netBankingText.getSize();
+              
+              // Click in the center-right of the Net Banking row (where the arrow would be)
+              const clickX = location.x + size.width + 50; // 50 pixels to the right
+              const clickY = location.y + (size.height / 2); // Center vertically
+              
+              console.log(`Clicking at coordinates: (${clickX}, ${clickY})`);
+              await browser.performActions([{
+                type: 'pointer',
+                id: 'finger1',
+                parameters: { pointerType: 'touch' },
+                actions: [
+                  { type: 'pointerMove', duration: 0, x: clickX, y: clickY },
+                  { type: 'pointerDown', button: 0 },
+                  { type: 'pause', duration: 100 },
+                  { type: 'pointerUp', button: 0 }
+                ]
+              }]);
+              
+              console.log('✅ Coordinate click performed');
+              
+              // Check if navigation happened
+              await browser.pause(3000);
+              const stillOnPaymentPage = await $('//*[contains(text(), "Payment Options")]');
+              if (!await stillOnPaymentPage.isExisting()) {
+                console.log('✅ Successfully navigated away from payment page with coordinates');
+                netBankingClicked = true;
+              } else {
+                console.log('⚠️ Still on payment page after coordinate click');
+              }
+            }
+          } catch (e) {
+            console.log('Coordinate click failed:', e.message);
+          }
+        }
+        
+        // Strategy 4: Try tapping on the entire screen area of Net Banking
+        if (!netBankingClicked) {
+          console.log('Strategy 4: Trying screen tap on Net Banking area...');
+          try {
+            const netBankingText = await $('//*[contains(text(), "Net Banking")]');
+            if (await netBankingText.isExisting()) {
+              // Try tapping on the element itself
+              await browser.touchAction({
+                action: 'tap',
+                element: netBankingText
+              });
+              console.log('✅ Touch action performed on Net Banking');
+              
+              // Check if navigation happened
+              await browser.pause(3000);
+              const stillOnPaymentPage = await $('//*[contains(text(), "Payment Options")]');
+              if (!await stillOnPaymentPage.isExisting()) {
+                console.log('✅ Successfully navigated away from payment page with touch action');
+                netBankingClicked = true;
+              } else {
+                console.log('⚠️ Still on payment page after touch action');
+              }
+            }
+          } catch (e) {
+            console.log('Touch action failed:', e.message);
+          }
+        }
+        
+        if (netBankingClicked) {
+          // Wait longer for the "Select your Bank" popup to appear
+          console.log('⏳ Net Banking selected successfully! Waiting for "Select your Bank" popup to appear...');
+          await browser.pause(7000); // Increased from 5000 to 7000ms for popup to fully load
+          
+          // Check if popup appeared
+          const selectBankPopup = await $('//*[contains(text(), "Select your Bank")]');
+          if (await selectBankPopup.isExisting()) {
+            console.log('✅ "Select your Bank" popup appeared!');
+            console.log('⏳ Waiting extra time for popup to fully render...');
+            await browser.pause(3000); // Extra wait for popup to fully render
+          } else {
+            console.log('⚠️ Popup may not have appeared yet, but continuing...');
+            await browser.pause(2000); // Still wait a bit even if popup text not found
+          }
+        } else {
+          console.log('❌ Could not click Net Banking option with any strategy - UI not moving forward');
+        }
+        
+      } catch (e) {
+        console.log('Net Banking option click failed:', e.message);
+      }
+      
+      // === STEP 12: SELECT ICICI BANK FROM POPUP ===
+      console.log('=== STEP 12: SELECTING ICICI BANK FROM POPUP ===');
+      await browser.pause(1000); // Reduced since we already waited above
+      
+      try {
+        // Look for ICICI bank option in the popup
+        console.log('Looking for ICICI text option in popup...');
+        const iciciBankOption = await $('//*[contains(text(), "ICICI")]');
+        console.log('✅ iciciBankOption ', iciciBankOption);
+        
+        if (await iciciBankOption.isExisting()) {
+          console.log('Found ICICI text option, clicking...');
+          await iciciBankOption.click();
+          console.log('✅ ICICI bank text selected from popup');
+          
+          // Wait for selection to register and popup to close
+          console.log('⏳ Waiting for ICICI selection to register...');
+          await browser.pause(3000); // Increased wait for selection to register
+          console.log('✅ ICICI bank selection completed');
+        } else {
+          console.log('❌ ICICI text option not found in popup');
+          
+          // Try alternative ICICI selectors
+          console.log('Trying alternative ICICI selectors...');
+          const iciciAlt = await $('//div[contains(text(), "ICICI")] | //span[contains(text(), "ICICI")] | //*[contains(@class, "bank")]//*[contains(text(), "ICICI")]');
+          if (await iciciAlt.isExisting()) {
+            console.log('Found ICICI with alternative selector, clicking...');
+            await iciciAlt.click();
+            console.log('✅ ICICI bank selected (alternative)');
+            await browser.pause(3000);
+          } else {
+            console.log('❌ ICICI bank not found with any selector');
+          }
+        }
+      } catch (e) {
+        console.log('ICICI bank selection from popup failed:', e.message);
+      }
+      
+    //   === STEP 13: CLICK PAY BUTTON ===
+    //   console.log('=== STEP 13: CLICKING PAY BUTTON ===');
+    //   await browser.pause(3000); // Increased delay as requested
+      
+    //   try {
+    //     // Look for Pay button with amount
+    //     console.log('Looking for Pay button...');
+    //     const payButton = await $('//*[contains(text(), "Pay ₹3,150") or contains(text(), "Pay ₹") or contains(text(), "Pay")]');
+    //     if (await payButton.isExisting()) {
+    //       console.log('Found Pay button, clicking...');
+    //       await payButton.click();
+    //       console.log('✅ Pay button clicked - proceeding to bank gateway');
+          
+    //       // Wait for bank gateway to load
+    //       await browser.pause(5000); // Increased wait time for bank gateway
+    //       console.log('✅ Should be redirected to ICICI bank gateway');
+    //     } else {
+    //       // Try alternative Pay button selectors
+    //       console.log('Pay button not found, trying alternative selectors...');
+    //       const payButtonAlt = await $('//button[contains(text(), "Pay")] | //div[contains(text(), "Pay")] | //*[contains(@class, "pay")]//*[contains(text(), "Pay")]');
+    //       if (await payButtonAlt.isExisting()) {
+    //         console.log('Found Pay button with alternative selector, clicking...');
+    //         await payButtonAlt.click();
+    //         console.log('✅ Pay button clicked (alternative)');
+    //         await browser.pause(5000);
+    //       } else {
+    //         console.log('❌ Pay button not found with any selector');
+    //       }
+    //     }
+    //   } catch (e) {
+    //     console.log('Pay button click failed:', e.message);
+    //   }
+      
+      // Final status
+    //   console.log('🎉 PAYMENT FLOW COMPLETED - Test should now be at bank gateway');
+    //   await browser.pause(3000); // Wait 3 seconds to see final state
     });
   });
   
