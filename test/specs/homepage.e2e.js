@@ -1,24 +1,25 @@
 describe('Paytm Bus Web App', () => {
     it('should open the bus page and complete full booking flow', async () => {
+      // Navigate to the bus page
       await browser.url('/bus');  // baseUrl + /bus = http://fe.paytm.com:3001/bus
       const title = await browser.getTitle();
       console.log('Page Title:', title);
       expect(title).toContain('Bus');  // Adjust based on actual page title
       
       // Wait for the page to load completely
-      await browser.pause(3000);
+      await browser.pause(2000); // Reduced from 3000
       
       // Check if From and To fields are already filled
       console.log('=== CHECKING IF FIELDS ARE ALREADY FILLED ===');
       let fieldsAlreadyFilled = false;
       
       try {
-        // Check if inputs have values
+        // Quick check if inputs have values
         const allInputs = await $$('//input');
         let fromFilled = false;
         let toFilled = false;
         
-        for (let input of allInputs) {
+        for (let input of allInputs.slice(0, 4)) { // Only check first 4 inputs to save time
           try {
             const value = await input.getValue();
             const placeholder = await input.getAttribute('placeholder');
@@ -39,279 +40,123 @@ describe('Paytm Bus Web App', () => {
         if (fromFilled && toFilled) {
           console.log('✅ Both From and To fields are already filled - skipping field filling');
           fieldsAlreadyFilled = true;
-        } else {
-          console.log('❌ Fields are not filled - will proceed with filling');
         }
       } catch (e) {
         console.log('Could not check field values, proceeding with filling:', e.message);
       }
       
       if (!fieldsAlreadyFilled) {
-        // Debug: Let's see what's actually on the page
-        console.log('=== DEBUGGING PAGE ELEMENTS ===');
+        console.log('=== FILLING FROM AND TO FIELDS QUICKLY ===');
         
-        // Find all input elements
-        const allInputs = await $$('//input');
-        console.log(`Found ${allInputs.length} input elements on page`);
+        // Scroll to top to ensure fields are visible
+        await browser.execute('window.scrollTo(0, 0)');
+        await browser.pause(500);
         
-        // Reduced debug logging to save time
-        if (allInputs.length > 0) {
-          try {
-            const placeholder = await allInputs[0].getAttribute('placeholder');
-            console.log(`First input placeholder: "${placeholder}"`);
-          } catch (e) {
-            console.log('Could not get first input attributes');
-          }
-        }
-        
-        // Try to find text elements with "From" and "To"
-        const fromTexts = await $$('//*[contains(text(), "From")]');
-        const toTexts = await $$('//*[contains(text(), "To")]');
-        console.log(`Found ${fromTexts.length} elements with "From" text`);
-        console.log(`Found ${toTexts.length} elements with "To" text`);
-        
-        // Let's try multiple strategies to find and fill the From field
-        console.log('=== TRYING TO FIND FROM FIELD ===');
-        let fromFieldFound = false;
-        
-        // Strategy 1: Look for input with "from" in placeholder (case insensitive)
+        // Quick strategy: Find first two inputs and fill them
         try {
-          const fromInput1 = await $('//input[contains(translate(@placeholder, "FROM", "from"), "from")]');
-          if (await fromInput1.isExisting()) {
-            console.log('Found From field with placeholder strategy');
-            await fromInput1.click();
-            await browser.pause(1000);
-            await fromInput1.setValue('Bengaluru');
-            console.log('Successfully entered Bengaluru in From field');
+          const allInputs = await $$('//input');
+          console.log(`Found ${allInputs.length} input elements on page`);
+          
+          if (allInputs.length >= 2) {
+            // Fill first input (From field)
+            console.log('Filling first input as From field...');
+            await allInputs[0].click();
+            await browser.pause(500);
+            await allInputs[0].setValue('Bengaluru');
+            console.log('✅ Entered Bengaluru in first input');
             
-            // Wait for suggestions to appear and select first one
-            await browser.pause(2000);
-            console.log('Looking for From field suggestions...');
-            
-            // Try different selectors for the first suggestion
-            const firstSuggestion = await $('//*[contains(text(), "Search Results")]/following-sibling::*//*[1] | //li[contains(text(), "Bengaluru")][1] | //*[contains(@class, "suggestion")][1] | //*[contains(@class, "dropdown")]//*[1]');
-            if (await firstSuggestion.isExisting()) {
-              console.log('Found From suggestion, clicking...');
-              await firstSuggestion.click();
-              console.log('Selected first From suggestion');
-            } else {
-              console.log('No From suggestions found, continuing...');
-            }
-            
-            fromFieldFound = true;
-          }
-        } catch (e) {
-          console.log('Strategy 1 failed:', e.message);
-        }
-        
-        // Strategy 2: Look for first input field in the page
-        if (!fromFieldFound) {
-          try {
-            const firstInput = await $('//input[1]');
-            if (await firstInput.isExisting()) {
-              console.log('Trying first input field as From field');
-              await firstInput.click();
-              await browser.pause(1000);
-              await firstInput.setValue('Bengaluru');
-              console.log('Successfully entered Bengaluru in first input field');
-              
-              // Wait for suggestions and select first one
-              await browser.pause(2000);
-              const firstSuggestion = await $('//*[contains(text(), "Bengaluru")][1] | //*[contains(@class, "suggestion")][1]');
+            // Wait briefly for suggestions and select first one
+            await browser.pause(1500);
+            try {
+              const firstSuggestion = await $('//*[contains(text(), "Bengaluru")][1] | //*[contains(@class, "suggestion")][1] | //li[1]');
               if (await firstSuggestion.isExisting()) {
                 await firstSuggestion.click();
-                console.log('Selected first suggestion from first input');
+                console.log('✅ Selected first suggestion');
               }
-              
-              fromFieldFound = true;
+            } catch (e) {
+              console.log('No suggestion found, continuing...');
             }
-          } catch (e) {
-            console.log('Strategy 2 failed:', e.message);
-          }
-        }
-        
-        // Strategy 3: Click near "From" text and find input
-        if (!fromFieldFound) {
-          try {
-            const fromText = await $('//*[contains(text(), "From")]');
-            if (await fromText.isExisting()) {
-              console.log('Found From text, clicking on it');
-              await fromText.click();
-              await browser.pause(1000);
-              
-              // Now try to find an active input or input near this element
-              const nearbyInput = await $('//*[contains(text(), "From")]/following::input[1] | //*[contains(text(), "From")]/preceding::input[1] | //*[contains(text(), "From")]/..//input');
-              if (await nearbyInput.isExisting()) {
-                await nearbyInput.setValue('Bengaluru');
-                console.log('Successfully entered Bengaluru via From text click');
-                
-                // Wait for suggestions and select first one
-                await browser.pause(2000);
-                const firstSuggestion = await $('//*[contains(text(), "Bengaluru")][1]');
-                if (await firstSuggestion.isExisting()) {
-                  await firstSuggestion.click();
-                  console.log('Selected suggestion via From text method');
-                }
-                
-                fromFieldFound = true;
-              }
-            }
-          } catch (e) {
-            console.log('Strategy 3 failed:', e.message);
-          }
-        }
-        
-        await browser.pause(2000);
-        
-        // Let's try multiple strategies to find and fill the To field
-        console.log('=== TRYING TO FIND TO FIELD ===');
-        let toFieldFound = false;
-        
-        // Strategy 1: Look for input with "to" in placeholder (case insensitive)
-        try {
-          const toInput1 = await $('//input[contains(translate(@placeholder, "TO", "to"), "to")]');
-          if (await toInput1.isExisting()) {
-            console.log('Found To field with placeholder strategy');
-            await toInput1.click();
+            
             await browser.pause(1000);
-            await toInput1.setValue('Hyderabad');
-            console.log('Successfully entered Hyderabad in To field');
             
-            // Wait for suggestions to appear and select first one
-            await browser.pause(3000);
-            console.log('Looking for To field suggestions...');
+            // Fill second input (To field)  
+            console.log('Filling second input as To field...');
+            await allInputs[1].click();
+            await browser.pause(500);
+            await allInputs[1].setValue('Hyderabad');
+            console.log('✅ Entered Hyderabad in second input');
             
-            // Look for the first Hyderabad option in the search results
-            const firstMumbaiOption = await $('//*[contains(text(), "Hyderabad")][1] | //*[contains(text(), "Search Results")]/following-sibling::*//*[contains(text(), "Hyderabad")][1]');
-            if (await firstMumbaiOption.isExisting()) {
-              console.log('Found first Hyderabad option, clicking...');
-              await firstMumbaiOption.click();
-              console.log('Selected first Hyderabad suggestion');
-            } else {
-              // Try alternative selectors for suggestions
-              const anySuggestion = await $('//*[contains(@class, "suggestion")][1] | //*[contains(@class, "dropdown")]//*[1] | //li[1]');
-              if (await anySuggestion.isExisting()) {
-                console.log('Found alternative suggestion, clicking...');
-                await anySuggestion.click();
-                console.log('Selected alternative suggestion');
-              }
-            }
-            
-            toFieldFound = true;
-          }
-        } catch (e) {
-          console.log('To Strategy 1 failed:', e.message);
-        }
-        
-        // Strategy 2: Look for second input field in the page
-        if (!toFieldFound) {
-          try {
-            const secondInput = await $('//input[2]');
-            if (await secondInput.isExisting()) {
-              console.log('Trying second input field as To field');
-              await secondInput.click();
-              await browser.pause(1000);
-              await secondInput.setValue('Hyderabad');
-              console.log('Successfully entered Hyderabad in second input field');
-              
-              // Wait for suggestions and select first one
-              await browser.pause(3000);
-              const firstSuggestion = await $('//*[contains(text(), "Hyderabad")][1]');
+            // Wait briefly for suggestions and select first one
+            await browser.pause(1500);
+            try {
+              const firstSuggestion = await $('//*[contains(text(), "Hyderabad")][1] | //*[contains(@class, "suggestion")][1] | //li[1]');
               if (await firstSuggestion.isExisting()) {
                 await firstSuggestion.click();
-                console.log('Selected Hyderabad suggestion from second input');
+                console.log('✅ Selected first suggestion');
               }
-              
-              toFieldFound = true;
+            } catch (e) {
+              console.log('No suggestion found, continuing...');
             }
-          } catch (e) {
-            console.log('To Strategy 2 failed:', e.message);
+            
+            console.log('✅ Field filling completed quickly');
+          } else {
+            console.log('❌ Not enough input fields found');
           }
+        } catch (e) {
+          console.log('Quick field filling failed:', e.message);
         }
         
-        // Strategy 3: Click near "To" text and find input
-        if (!toFieldFound) {
-          try {
-            const toText = await $('//*[contains(text(), "To")]');
-            if (await toText.isExisting()) {
-              console.log('Found To text, clicking on it');
-              await toText.click();
-              await browser.pause(1000);
-              
-              // Now try to find an active input or input near this element
-              const nearbyInput = await $('//*[contains(text(), "To")]/following::input[1] | //*[contains(text(), "To")]/preceding::input[1] | //*[contains(text(), "To")]/..//input');
-              if (await nearbyInput.isExisting()) {
-                await nearbyInput.setValue('Hyderabad');
-                console.log('Successfully entered Hyderabad via To text click');
-                
-                // Wait for suggestions and select first one
-                await browser.pause(3000);
-                const firstSuggestion = await $('//*[contains(text(), "Hyderabad")][1]');
-                if (await firstSuggestion.isExisting()) {
-                  await firstSuggestion.click();
-                  console.log('Selected Hyderabad suggestion via To text method');
-                }
-                
-                toFieldFound = true;
-              }
-            }
-          } catch (e) {
-            console.log('To Strategy 3 failed:', e.message);
-          }
-        }
-        
-        await browser.pause(3000);
+        await browser.pause(1000); // Reduced wait time
       } else {
         console.log('⏩ Skipping field filling since fields are already populated');
       }
       
-      // Now try to find and click the Search Buses button (this runs regardless of whether fields were filled)
-      console.log('=== TRYING TO FIND SEARCH BUSES BUTTON ===');
+      // Scroll down to find search button
+      console.log('=== FINDING SEARCH BUTTON ===');
+      await browser.execute('window.scrollBy(0, 200)');
+      await browser.pause(500);
+      
       try {
-        const searchButton = await $('//*[contains(text(), "Search Buses")]');
+        // Look for search button with multiple selectors quickly
+        const searchButton = await $('//*[contains(text(), "Search Buses")] | //button[contains(text(), "Search")] | //*[contains(text(), "Search")]');
         if (await searchButton.isExisting()) {
-          console.log('Found Search Buses button, clicking...');
+          console.log('Found search button, clicking...');
           await searchButton.click();
-          console.log('Search Buses button clicked successfully');
+          console.log('✅ Search button clicked successfully');
         } else {
-          // Try to find any button with "Search" text
-          const searchBtn = await $('//button[contains(text(), "Search")] | //*[contains(text(), "Search")]');
-          if (await searchBtn.isExisting()) {
-            console.log('Found alternative search button, clicking...');
-            await searchBtn.click();
-            console.log('Alternative search button clicked');
+          // Scroll down more to find search button
+          console.log('Search button not found, scrolling down...');
+          await browser.execute('window.scrollBy(0, 300)');
+          await browser.pause(1000);
+          
+          const searchBtnAfterScroll = await $('//*[contains(text(), "Search Buses")] | //*[contains(text(), "Search")]');
+          if (await searchBtnAfterScroll.isExisting()) {
+            console.log('Found search button after scroll, clicking...');
+            await searchBtnAfterScroll.click();
+            console.log('✅ Search button clicked after scroll');
           } else {
-            console.log('No search button found, trying to scroll and find it...');
-            
-            // Try scrolling down to find the search button
-            await browser.execute('window.scrollBy(0, 300)');
-            await browser.pause(1000);
-            
-            const searchBtnAfterScroll = await $('//*[contains(text(), "Search Buses")] | //*[contains(text(), "Search")]');
-            if (await searchBtnAfterScroll.isExisting()) {
-              console.log('Found search button after scroll, clicking...');
-              await searchBtnAfterScroll.click();
-              console.log('Search button clicked after scroll');
-            } else {
-              console.log('Still no search button found');
-            }
+            console.log('❌ Still no search button found - may need manual intervention');
+            throw new Error('Search button not found after scrolling');
           }
         }
       } catch (e) {
         console.log('Search button click failed:', e.message);
+        throw new Error('Could not proceed past homepage - search button issue');
       }
       
-      // Wait for navigation to search results
-      await browser.pause(5000);
+      // Wait for navigation to search results (reduced wait time)
+      console.log('⏳ Waiting for navigation to search results...');
+      await browser.pause(3000); // Reduced from 5000
       
       let currentUrl = await browser.getUrl();
       console.log('URL after search:', currentUrl);
       
       // Verify navigation success
-      if (currentUrl.includes('search') || currentUrl.includes('result') || currentUrl !== await browser.url('/bus')) {
+      if (currentUrl.includes('search') || currentUrl.includes('result')) {
         console.log('✅ Successfully navigated to search results page');
       } else {
-        console.log('❌ May not have navigated to search results');
+        console.log('❌ May not have navigated to search results - URL:', currentUrl);
+        // Try to continue anyway
       }
       
       // === STEP 1: CLICK FIRST BUS CARD ===
@@ -459,63 +304,96 @@ describe('Paytm Bus Web App', () => {
       await browser.pause(3000);
       
       try {
-        // Look for pickup point cards (gray containers) - click on the card, not radio button
-        console.log('Looking for pickup point cards to click...');
+        // Use calendar icon as reference to find pickup point cards and select first available
+        console.log('Looking for pickup points using calendar icon reference...');
         
-        // Find pickup point cards by looking for elements containing pickup location names
-        const pickupCards = await $$('//*[contains(text(), "metro") or contains(text(), "station") or contains(text(), "Akshardham") or contains(text(), "kashmir") or contains(text(), "gate") or contains(text(), "tila") or contains(text(), "Majnu")]');
-        console.log(`Found ${pickupCards.length} pickup point name elements`);
+        // Find all calendar icons (pickup/drop points have calendar icons)
+        const calendarIcons = await $$('//img[contains(@src, "calendar") or contains(@alt, "calendar")]');
+        console.log(`Found ${calendarIcons.length} calendar icons`);
         
         let pickupSelected = false;
         
-        // Try to click on each pickup card container until one works
-        for (let i = 0; i < pickupCards.length; i++) {
+        // Try each calendar icon's parent container until we find an available one
+        for (let i = 0; i < calendarIcons.length; i++) {
           try {
-            // Get the card container (parent element that contains the whole pickup info)
-            const cardContainer = await pickupCards[i].$('..');
+            console.log(`Checking calendar icon ${i} for pickup point...`);
             
-            if (await cardContainer.isExisting()) {
-              const isDisplayed = await cardContainer.isDisplayed();
-              const isClickable = await cardContainer.isClickable();
+            // Get the parent container of the calendar icon (the pickup/drop point card)
+            const pickupCard = await calendarIcons[i].$('../../..');  // Go up multiple levels to get the card
+            
+            if (await pickupCard.isExisting()) {
+              // Check if this card is disabled
+              const cardClasses = await pickupCard.getAttribute('class');
+              const isDisabled = cardClasses && (cardClasses.includes('disabled') || cardClasses.includes('inactive'));
               
-              if (isDisplayed && isClickable) {
-                console.log(`Clicking pickup point card ${i}...`);
-                await cardContainer.click();
-                console.log(`✅ Successfully clicked pickup point card ${i}`);
-                pickupSelected = true;
-                break;
+              if (!isDisabled) {
+                const isDisplayed = await pickupCard.isDisplayed();
+                const isClickable = await pickupCard.isClickable();
+                
+                if (isDisplayed && isClickable) {
+                  console.log(`Clicking available pickup point card ${i}...`);
+                  await pickupCard.click();
+                  console.log(`✅ Successfully selected pickup point ${i}`);
+                  pickupSelected = true;
+                  break;
+                } else {
+                  console.log(`Pickup card ${i} is not clickable, trying next...`);
+                }
+              } else {
+                console.log(`Pickup card ${i} is disabled, skipping to next...`);
               }
             }
             
-            // If parent doesn't work, try clicking the element itself
+            // Alternative: Try the radio button inside this calendar icon's container
             if (!pickupSelected) {
-              const isDisplayed = await pickupCards[i].isDisplayed();
-              const isClickable = await pickupCards[i].isClickable();
+              const radioButton = await calendarIcons[i].$('../../..//input[@type="radio"]');
+              if (await radioButton.isExisting()) {
+                const isEnabled = await radioButton.isEnabled();
+                if (isEnabled) {
+                  console.log(`Clicking radio button for pickup point ${i}...`);
+                  await radioButton.click();
+                  console.log(`✅ Successfully selected pickup point via radio ${i}`);
+                  pickupSelected = true;
+                  break;
+                } else {
+                  console.log(`Radio button ${i} is disabled, trying next...`);
+                }
+              }
+            }
+            
+          } catch (e) {
+            console.log(`Failed to process pickup point ${i}:`, e.message);
+          }
+        }
+        
+        // Fallback: If no calendar icons worked, try generic approach
+        if (!pickupSelected) {
+          console.log('Fallback: Looking for any available radio button...');
+          const availableRadios = await $$('//input[@type="radio" and not(@disabled)]');
+          
+          for (let i = 0; i < availableRadios.length; i++) {
+            try {
+              const radio = availableRadios[i];
+              const isDisplayed = await radio.isDisplayed();
+              const isEnabled = await radio.isEnabled();
               
-              if (isDisplayed && isClickable) {
-                console.log(`Clicking pickup point element ${i}...`);
-                await pickupCards[i].click();
-                console.log(`✅ Successfully clicked pickup point element ${i}`);
+              if (isDisplayed && isEnabled) {
+                console.log(`Clicking fallback radio button ${i}...`);
+                await radio.click();
+                console.log(`✅ Fallback pickup selection successful`);
                 pickupSelected = true;
                 break;
               }
+            } catch (e) {
+              console.log(`Fallback radio ${i} failed:`, e.message);
             }
-          } catch (e) {
-            console.log(`Failed to click pickup point ${i}:`, e.message);
           }
         }
         
         if (!pickupSelected) {
-          // Fallback: Look for any clickable element in the pickup section
-          const anyPickupElement = await $('//*[contains(text(), "Pickup Point")]/following-sibling::*//*[1]');
-          if (await anyPickupElement.isExisting()) {
-            console.log('Trying fallback pickup element...');
-            await anyPickupElement.click();
-            console.log('✅ Clicked fallback pickup element');
-          } else {
-            console.log('❌ No pickup point found, but continuing...');
-          }
+          console.log('❌ Could not select any pickup point');
         }
+        
       } catch (e) {
         console.log('Pickup point selection failed:', e.message);
       }
@@ -527,63 +405,96 @@ describe('Paytm Bus Web App', () => {
       console.log('=== STEP 5: SELECTING DROP POINT ===');
       
       try {
-        // Look for drop point cards (gray containers) - click on the card, not radio button
-        console.log('Looking for drop point cards to click...');
+        // Use calendar icon as reference to find drop point cards and select first available
+        console.log('Looking for drop points using calendar icon reference...');
         
-        // Find drop point cards by looking for elements containing drop location names
-        const dropCards = await $$('//*[contains(text(), "Virar") or contains(text(), "Katrej") or contains(text(), "Borivali") or contains(text(), "mumbai") or contains(text(), "ata") or contains(text(), "pass")]');
-        console.log(`Found ${dropCards.length} drop point name elements`);
+        // Find all calendar icons (after pickup selection, these should be drop points)
+        const calendarIcons = await $$('//img[contains(@src, "calendar") or contains(@alt, "calendar")]');
+        console.log(`Found ${calendarIcons.length} calendar icons for drop points`);
         
         let dropSelected = false;
         
-        // Try to click on each drop card container until one works
-        for (let i = 0; i < dropCards.length; i++) {
+        // Try each calendar icon's parent container until we find an available one
+        for (let i = 0; i < calendarIcons.length; i++) {
           try {
-            // Get the card container (parent element that contains the whole drop info)
-            const cardContainer = await dropCards[i].$('..');
+            console.log(`Checking calendar icon ${i} for drop point...`);
             
-            if (await cardContainer.isExisting()) {
-              const isDisplayed = await cardContainer.isDisplayed();
-              const isClickable = await cardContainer.isClickable();
+            // Get the parent container of the calendar icon (the pickup/drop point card)
+            const dropCard = await calendarIcons[i].$('../../..');  // Go up multiple levels to get the card
+            
+            if (await dropCard.isExisting()) {
+              // Check if this card is disabled
+              const cardClasses = await dropCard.getAttribute('class');
+              const isDisabled = cardClasses && (cardClasses.includes('disabled') || cardClasses.includes('inactive'));
               
-              if (isDisplayed && isClickable) {
-                console.log(`Clicking drop point card ${i}...`);
-                await cardContainer.click();
-                console.log(`✅ Successfully clicked drop point card ${i}`);
-                dropSelected = true;
-                break;
+              if (!isDisabled) {
+                const isDisplayed = await dropCard.isDisplayed();
+                const isClickable = await dropCard.isClickable();
+                
+                if (isDisplayed && isClickable) {
+                  console.log(`Clicking available drop point card ${i}...`);
+                  await dropCard.click();
+                  console.log(`✅ Successfully selected drop point ${i}`);
+                  dropSelected = true;
+                  break;
+                } else {
+                  console.log(`Drop card ${i} is not clickable, trying next...`);
+                }
+              } else {
+                console.log(`Drop card ${i} is disabled, skipping to next...`);
               }
             }
             
-            // If parent doesn't work, try clicking the element itself
+            // Alternative: Try the radio button inside this calendar icon's container
             if (!dropSelected) {
-              const isDisplayed = await dropCards[i].isDisplayed();
-              const isClickable = await dropCards[i].isClickable();
+              const radioButton = await calendarIcons[i].$('../../..//input[@type="radio"]');
+              if (await radioButton.isExisting()) {
+                const isEnabled = await radioButton.isEnabled();
+                if (isEnabled) {
+                  console.log(`Clicking radio button for drop point ${i}...`);
+                  await radioButton.click();
+                  console.log(`✅ Successfully selected drop point via radio ${i}`);
+                  dropSelected = true;
+                  break;
+                } else {
+                  console.log(`Radio button ${i} is disabled, trying next...`);
+                }
+              }
+            }
+            
+          } catch (e) {
+            console.log(`Failed to process drop point ${i}:`, e.message);
+          }
+        }
+        
+        // Fallback: If no calendar icons worked, try generic approach
+        if (!dropSelected) {
+          console.log('Fallback: Looking for any available radio button...');
+          const availableRadios = await $$('//input[@type="radio" and not(@disabled)]');
+          
+          for (let i = 0; i < availableRadios.length; i++) {
+            try {
+              const radio = availableRadios[i];
+              const isDisplayed = await radio.isDisplayed();
+              const isEnabled = await radio.isEnabled();
               
-              if (isDisplayed && isClickable) {
-                console.log(`Clicking drop point element ${i}...`);
-                await dropCards[i].click();
-                console.log(`✅ Successfully clicked drop point element ${i}`);
+              if (isDisplayed && isEnabled) {
+                console.log(`Clicking fallback radio button ${i}...`);
+                await radio.click();
+                console.log(`✅ Fallback drop selection successful`);
                 dropSelected = true;
                 break;
               }
+            } catch (e) {
+              console.log(`Fallback radio ${i} failed:`, e.message);
             }
-          } catch (e) {
-            console.log(`Failed to click drop point ${i}:`, e.message);
           }
         }
         
         if (!dropSelected) {
-          // Fallback: Look for any clickable element in the drop section
-          const anyDropElement = await $('//*[contains(text(), "Drop Point")]/following-sibling::*//*[1]');
-          if (await anyDropElement.isExisting()) {
-            console.log('Trying fallback drop element...');
-            await anyDropElement.click();
-            console.log('✅ Clicked fallback drop element');
-          } else {
-            console.log('❌ No drop point found, but trying to proceed...');
-          }
+          console.log('❌ Could not select any drop point');
         }
+        
       } catch (e) {
         console.log('Drop point selection failed:', e.message);
       }

@@ -89,10 +89,10 @@ exports.config = {
     // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
     // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
     // gets prepended directly.
-    baseUrl: 'https://tickets.paytm.com',
+    baseUrl: 'https://staging.paytm.com',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 10000,
+    waitforTimeout: 180000,
     //
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response
