@@ -164,13 +164,54 @@ describe('Paytm Bus Web App', () => {
     
     let fieldsFilledSuccessfully = false;
     
-    // First check if From and To fields are already filled
+    // Check if From and To fields are already filled using the specific xpath
     console.log('Checking if From and To fields are already filled...');
-    const fromDiv = await $('//*[contains(text(), "From")]');
-    const toDiv = await $('//*[contains(text(), "To")]');
+    const fromDiv = await $('//*[@id="bookingForm"]/div[2]/div[1]/div/div/div[1]/div/div');
     
-   
-      console.log('From and To fields need to be filled. Proceeding with form filling...', fromDiv);
+    if (await fromDiv.isExisting()) {
+      const fromDivText = await fromDiv.getText();
+      console.log('From div text value:', fromDivText);
+      
+      // Check if From div contains any city name (not just "From" text)
+      // If it contains text other than "From" or is not empty, it likely has a city
+      const hasFromCity = fromDivText && fromDivText.trim() && 
+                         !fromDivText.toLowerCase().includes('from') && 
+                         fromDivText.length > 2;
+      
+      if (hasFromCity) {
+        console.log('✅ From div already contains a city:', fromDivText);
+        fieldsFilledSuccessfully = true;
+        
+        // Check To div as well
+        // const toDiv = await $('//*[@id="bookingForm"]/div[2]/div[1]/div/div/div[2]/div/div');
+        // if (await toDiv.isExisting()) {
+        //   const toDivText = await toDiv.getText();
+        //   console.log('To div text value:', toDivText);
+          
+        //   const hasToCity = toDivText && toDivText.trim() && 
+        //                    !toDivText.toLowerCase().includes('to') && 
+        //                    toDivText.length > 2;
+          
+        //   if (hasToCity) {
+        //     console.log('✅ To div already contains a city:', toDivText);
+        //     console.log('🚀 Both From and To fields are already filled - skipping form filling');
+        //     fieldsFilledSuccessfully = true;
+        //   } else {
+        //     console.log('To div needs to be filled, proceeding with form filling...');
+        //   }
+        // } else {
+        //   console.log('To div not found, proceeding with form filling...');
+        // }
+      } else {
+        console.log('From div needs to be filled, proceeding with form filling...');
+      }
+    } else {
+      console.log('From div not found with specific xpath, proceeding with form filling...');
+    }
+    
+    // Only fill forms if fields are not already populated
+    if (!fieldsFilledSuccessfully) {
+      console.log('From and To fields need to be filled. Proceeding with form filling...');
       
       try {
         // Click on From div to open input field
@@ -404,7 +445,9 @@ describe('Paytm Bus Web App', () => {
       } catch (e) {
         console.log('Field filling failed:', e.message);
       }
-    
+    } else {
+      console.log('✅ From and To fields are already populated - skipping form filling');
+    }
     
     await browser.pause(1000);
     
@@ -489,7 +532,7 @@ describe('Paytm Bus Web App', () => {
     
     // === STEP 2: SELECT SEAT ===
     console.log('=== STEP 2: SELECTING SEAT ===');
-    await browser.pause(4000);
+    await browser.pause(7000);
     
     try {
       console.log('🪑 Looking for ANY available seat to click just ONCE...');
@@ -946,6 +989,27 @@ describe('Paytm Bus Web App', () => {
             // Log current state every 10 seconds to show automation is waiting
             console.log(`⏳ Still waiting... Current URL: ${currentUrl.substring(0, 80)}...`);
             console.log(`⏳ Still waiting... Page title: ${pageTitle}`);
+
+            await browser.pause(2000);
+    
+            // === STEP 6: CLICK PROCEED BUTTON ===
+            console.log('=== STEP 6: CLICKING PROCEED BUTTON ===');
+            
+            try {
+              // Look specifically for Proceed button
+              console.log('Looking for Proceed button after login...');
+              const proceedButton = await $('//*[contains(text(), "Proceed")]');
+              if (await proceedButton.isExisting()) {
+                console.log('Found Proceed button, clicking...');
+                await proceedButton.click();
+                console.log('✅ Proceed button clicked');
+              } else {
+                throw new Error('Proceed button not found');
+              }
+            } catch (e) {
+              console.log('Proceed button click failed:', e.message);
+              throw new Error('Could not find proceed button to continue booking flow');
+            }
             
             // Check multiple indicators that we've reached the Add Passengers page
             const passengerIndicators = await $$('//*[contains(text(), "Passenger") or contains(text(), "Add Passenger") or contains(text(), "Contact Details") or contains(text(), "Saved Passengers")]');
