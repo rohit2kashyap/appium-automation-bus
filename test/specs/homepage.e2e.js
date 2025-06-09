@@ -976,60 +976,41 @@ describe('Paytm Bus Web App', () => {
     console.log('🔑 Login iframe should appear - please complete login manually');
     console.log('⏳ The automation is now SUSPENDED - waiting for you to complete login...');
     console.log('📋 Please complete the login process in the iframe/popup');
-    console.log('⚠️  The test will automatically resume once you reach the Add Passengers page');
+    console.log('⚠️  The test will automatically resume once login is completed and Proceed button appears');
     
     try {
-      // Wait for up to 3 minutes for user to complete login and reach Add Passengers page
+      // Wait for up to 5 minutes for user to complete login and reach the page with Proceed button
       await browser.waitUntil(
         async () => {
           try {
             const currentUrl = await browser.getUrl();
             const pageTitle = await browser.getTitle();
             
-            // Log current state every 10 seconds to show automation is waiting
-            console.log(`⏳ Still waiting... Current URL: ${currentUrl.substring(0, 80)}...`);
-            console.log(`⏳ Still waiting... Page title: ${pageTitle}`);
+            // Log current state every 15 seconds to show automation is waiting
+            console.log(`⏳ Still waiting for login completion... Current URL: ${currentUrl.substring(0, 80)}...`);
+            console.log(`⏳ Still waiting for login completion... Page title: ${pageTitle}`);
 
-            await browser.pause(2000);
-    
-            // === STEP 6: CLICK PROCEED BUTTON ===
-            console.log('=== STEP 6: CLICKING PROCEED BUTTON ===');
+            // Check if login is completed by looking for Proceed button after login
+            console.log('Looking for Proceed button after login...');
+            const proceedButtonAfterLogin = await $('//*[contains(text(), "Proceed")]');
             
-            try {
-              // Look specifically for Proceed button
-              console.log('Looking for Proceed button after login...');
-              const proceedButton = await $('//*[contains(text(), "Proceed")]');
-              if (await proceedButton.isExisting()) {
-                console.log('Found Proceed button, clicking...');
-                await proceedButton.click();
-                console.log('✅ Proceed button clicked');
+            if (await proceedButtonAfterLogin.isExisting()) {
+              const isDisplayed = await proceedButtonAfterLogin.isDisplayed();
+              const isClickable = await proceedButtonAfterLogin.isClickable();
+              
+              if (isDisplayed && isClickable) {
+                console.log('✅ SUCCESS: Found Proceed button after login - login completed successfully!');
+                console.log('🚀 RESUMING AUTOMATION from Proceed button click...');
+                return true;
               } else {
-                throw new Error('Proceed button not found');
+                console.log('⏳ Proceed button found but not ready yet...');
               }
-            } catch (e) {
-              console.log('Proceed button click failed:', e.message);
-              throw new Error('Could not find proceed button to continue booking flow');
-            }
-            
-            // Check multiple indicators that we've reached the Add Passengers page
-            const passengerIndicators = await $$('//*[contains(text(), "Passenger") or contains(text(), "Add Passenger") or contains(text(), "Contact Details") or contains(text(), "Saved Passengers")]');
-            
-            if (passengerIndicators.length > 0) {
-              console.log('✅ SUCCESS: Detected Add Passengers page - login completed successfully!');
-              console.log('🚀 RESUMING AUTOMATION from Add Passengers step...');
-              return true;
-            }
-            
-            // Alternative check - look for passenger form elements
-            const passengerFormElements = await $$('//*[contains(text(), "Mr.") or contains(text(), "Ms.") or contains(@placeholder, "Name") or contains(@placeholder, "Mobile")]');
-            if (passengerFormElements.length > 0) {
-              console.log('✅ SUCCESS: Detected passenger form elements - login completed successfully!');
-              console.log('🚀 RESUMING AUTOMATION from Add Passengers step...');
-              return true;
+            } else {
+              console.log('⏳ Proceed button not found yet - login still in progress...');
             }
             
             // Check if we're still on login page (iframe might still be open)
-            const loginIndicators = await $$('//*[contains(text(), "Login") or contains(text(), "Sign In") or contains(text(), "OTP")]');
+            const loginIndicators = await $$('//*[contains(text(), "Login") or contains(text(), "Sign In") or contains(text(), "OTP") or contains(text(), "Enter") or contains(text(), "Verify")]');
             if (loginIndicators.length > 0) {
               console.log('⏳ Login page still detected - please complete the login process');
             }
@@ -1041,37 +1022,92 @@ describe('Paytm Bus Web App', () => {
           }
         },
         {
-          timeout: 180000, // 3 minutes for user to complete login
-          interval: 10000,  // Check every 10 seconds
-          timeoutMsg: '❌ Login was not completed within 3 minutes or Add Passengers page not reached'
+          timeout: 300000, // 5 minutes for user to complete login
+          interval: 15000,  // Check every 15 seconds
+          timeoutMsg: '❌ Login was not completed within 5 minutes or Proceed button did not appear'
         }
       );
       
-      console.log('🎉 Login completed successfully - proceeding with passenger selection');
+      console.log('🎉 Login completed successfully - proceeding with Proceed button click');
       
     } catch (e) {
       console.log('❌ Login wait failed or timed out:', e.message);
       console.log('🔄 Attempting to continue anyway - checking if we can proceed...');
       
       // One final check to see if we're actually on the right page
-      const finalCheck = await $$('//*[contains(text(), "Passenger") or contains(text(), "Add Passenger")]');
-      if (finalCheck.length > 0) {
-        console.log('✅ Found passenger elements on final check - proceeding...');
+      const finalProceedCheck = await $('//*[contains(text(), "Proceed")]');
+      if (await finalProceedCheck.isExisting()) {
+        console.log('✅ Found Proceed button on final check - proceeding...');
       } else {
-        console.log('❌ Still no passenger elements found - manual intervention may be required');
+        console.log('❌ Still no Proceed button found - manual intervention may be required');
         throw new Error('Login verification failed - please check if login was completed successfully');
       }
     }
     
-    // Additional wait for page to fully settle after login
-    console.log('⏳ Allowing page to fully settle after login...');
-    await browser.pause(5000);
+    // Additional wait for page to fully settle after login detection
+    console.log('⏳ Allowing page to fully settle after login detection...');
+    await browser.pause(3000);
     
-    // Log current state before proceeding
+    // === STEP 7.5: CLICK PROCEED BUTTON AFTER LOGIN ===
+    console.log('=== STEP 7.5: CLICKING PROCEED BUTTON AFTER LOGIN ===');
+    
+    try {
+      // Look specifically for Proceed button after login
+      console.log('Looking for Proceed button after login...');
+      const proceedButtonAfterLogin = await $('//*[contains(text(), "Proceed")]');
+      
+      if (await proceedButtonAfterLogin.isExisting()) {
+        console.log('Found Proceed button after login, clicking...');
+        
+        // Scroll to button to ensure it's visible
+        await proceedButtonAfterLogin.scrollIntoView();
+        await browser.pause(1000);
+        
+        const isDisplayed = await proceedButtonAfterLogin.isDisplayed();
+        const isClickable = await proceedButtonAfterLogin.isClickable();
+        
+        console.log(`Proceed button - displayed: ${isDisplayed}, clickable: ${isClickable}`);
+        
+        if (isDisplayed && isClickable) {
+          console.log('✅ Clicking Proceed button after login...');
+          await proceedButtonAfterLogin.click();
+          console.log('✅ Proceed button clicked successfully after login');
+          
+          // Wait for navigation after Proceed click
+          await browser.pause(5000);
+          
+          // Verify navigation to next step (passenger page or similar)
+          const nextPageIndicators = await $$('//*[contains(text(), "Passenger") or contains(text(), "Add Passenger") or contains(text(), "Contact Details") or contains(text(), "Saved Passengers")]');
+          if (nextPageIndicators.length > 0) {
+            console.log('✅ Successfully navigated to passenger selection page after Proceed');
+          } else {
+            console.log('⚠️ Navigation may not have completed - continuing anyway');
+          }
+        } else {
+          console.log('Proceed button found but not clickable, trying JavaScript click...');
+          
+          // Try JavaScript click as fallback
+          await browser.execute((element) => {
+            element.click();
+          }, proceedButtonAfterLogin);
+          console.log('✅ Proceed button clicked using JavaScript after login');
+          await browser.pause(5000);
+        }
+      } else {
+        console.log('❌ Proceed button not found after login wait');
+        throw new Error('Proceed button not found after login completion');
+      }
+      
+    } catch (e) {
+      console.log('❌ Proceed button click after login failed:', e.message);
+      throw new Error('Failed to click Proceed button after login: ' + e.message);
+    }
+    
+    // Log current state before proceeding to passenger selection
     try {
       const currentUrl = await browser.getUrl();
       const pageTitle = await browser.getTitle();
-      console.log(`📍 Current URL before passenger selection: ${currentUrl}`);
+      console.log(`📍 Current URL after Proceed button: ${currentUrl}`);
       console.log(`📍 Current page title: ${pageTitle}`);
     } catch (e) {
       console.log('Could not log current state');
