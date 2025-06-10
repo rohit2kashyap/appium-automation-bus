@@ -49,14 +49,33 @@ exports.config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [{
-        // capabilities for local Appium web tests on iOS
-        platformName: 'iOS',
-        browserName: 'Safari',
-        'appium:deviceName': 'iPhone 14 Pro Max',
-        'appium:platformVersion': '16.1',
-        'appium:automationName': 'XCUITest'
-    }],
+    capabilities: [
+        {
+            // Chrome Desktop view
+            browserName: 'chrome',
+            'goog:chromeOptions': {
+                args: ['--disable-web-security', '--disable-features=VizDisplayCompositor']
+            }
+        },
+        {
+            // Chrome Mobile view (iPhone 12 Pro simulation)
+            browserName: 'chrome',
+            'goog:chromeOptions': {
+                args: ['--disable-web-security', '--disable-features=VizDisplayCompositor'],
+                mobileEmulation: {
+                    deviceName: 'iPhone 12 Pro'
+                }
+            }
+        },
+        {
+            // iOS Safari simulator
+            platformName: 'iOS',
+            browserName: 'Safari',
+            'appium:deviceName': 'iPhone 14 Pro Max',
+            'appium:platformVersion': '16.1',
+            'appium:automationName': 'XCUITest'
+        }
+    ],
 
     //
     // ===================
@@ -114,11 +133,6 @@ exports.config = {
         // For most of the time the default host (localhost) is used
         hostname: 'localhost'
     },
-    
-    // Set the hostname and port for WebDriver connection
-    hostname: 'localhost',
-    port: 4723,
-    path: '/wd/hub',
     //
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber

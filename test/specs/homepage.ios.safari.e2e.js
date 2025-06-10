@@ -6,16 +6,22 @@ describe('Paytm Bus Web App', () => {
     // Clear all browser storage and cookies before executing the test
     console.log('=== CLEARING ALL BROWSER STORAGE AND COOKIES ===');
     
-    // Clear localStorage, sessionStorage, and cookies
-    // await browser.execute(() => {
-    //   // Clear localStorage
-    //   if (typeof localStorage !== 'undefined') {
-    //     // localStorage.clear();
-    //     localStorage.setItem('sessionValue', {"isLogin":true,"env":"production","action_type":"login","user":{"info":{"id":1338927460,"email":"kashyaprohit8360@gmail.com","userTypes":["BANK_CUSTOMER","SD_MERCHANT","MERCHANT"],"minKycDetails":{"isMinKyc":true,"kycState":"PAYTM_MIN_KYC"},"expiryTime":"1749638959000","userAttributeInfo":{"IVR_FLAG":"1","USER_TYPE":"3,5,4","CHAT_LANGUAGE":"en-IN","CUSTOMER_TYPE":"0","BANK_CONSENT":"true","isCAeligible":"true","SMS_FLAG":"1"},"firstName":"","lastName":"","mobile":8360351172,"countryCode":"91","isKyc":false,"created_at":"Jul 4, 2021 3:09:34 PM","walletType":"SCW","sendEmailFLag":true,"is_verified_email":true,"is_verified_mobile":true,"status":true,"username":8360351172},"id":1338927460,"email":"kashyaprohit8360@gmail.com","sso_token_enc":"15dcd9d9a499e81e02990ea23c6aa098fcdb4ab70421f5b03cba3add174380fa07447b82c5f6fa165cedb19ae8ddd128","sso_token_enc_iv":"9c3936f270cc8d2dd5d840cc7956daa7a52f70a4904a068c81c46e7171f7f3b4da095ecb7fd14f6302dd5bb862503346","encWalletToken":"15dcd9d9a499e81e02990ea23c6aa098fcdb4ab70421f5b03cba3add174380fa07447b82c5f6fa165cedb19ae8ddd128","encWalletTokenIV":"9c3936f270cc8d2dd5d840cc7956daa7a52f70a4904a068c81c46e7171f7f3b4da095ecb7fd14f6302dd5bb862503346"}});
-    //     localStorage.removeItem('Paytm-MBus-RecentSearches');
-    //     console.log('✅ localStorage cleared');
-    //   }
-    // });
+    // Set required localStorage values before executing automation
+    await browser.execute(() => {
+      // Set localStorage values
+      if (typeof localStorage !== 'undefined') {
+        // Set the required localStorage value for smart filter coach
+        localStorage.setItem('Paytm-MBus-smartFilterCoachShown', 'true');
+        console.log('✅ localStorage set: Paytm-MBus-smartFilterCoachShown = true');
+        
+        // Set session value (keeping existing session data)
+        localStorage.setItem('sessionValue', JSON.stringify({"isLogin":true,"env":"production","action_type":"login","user":{"info":{"id":1338927460,"email":"kashyaprohit8360@gmail.com","userTypes":["BANK_CUSTOMER","SD_MERCHANT","MERCHANT"],"minKycDetails":{"isMinKyc":true,"kycState":"PAYTM_MIN_KYC"},"expiryTime":"1749638959000","userAttributeInfo":{"IVR_FLAG":"1","USER_TYPE":"3,5,4","CHAT_LANGUAGE":"en-IN","CUSTOMER_TYPE":"0","BANK_CONSENT":"true","isCAeligible":"true","SMS_FLAG":"1"},"firstName":"","lastName":"","mobile":8360351172,"countryCode":"91","isKyc":false,"created_at":"Jul 4, 2021 3:09:34 PM","walletType":"SCW","sendEmailFLag":true,"is_verified_email":true,"is_verified_mobile":true,"status":true,"username":8360351172},"id":1338927460,"email":"kashyaprohit8360@gmail.com","sso_token_enc":"15dcd9d9a499e81e02990ea23c6aa098fcdb4ab70421f5b03cba3add174380fa07447b82c5f6fa165cedb19ae8ddd128","sso_token_enc_iv":"9c3936f270cc8d2dd5d840cc7956daa7a52f70a4904a068c81c46e7171f7f3b4da095ecb7fd14f6302dd5bb862503346","encWalletToken":"15dcd9d9a499e81e02990ea23c6aa098fcdb4ab70421f5b03cba3add174380fa07447b82c5f6fa165cedb19ae8ddd128","encWalletTokenIV":"9c3936f270cc8d2dd5d840cc7956daa7a52f70a4904a068c81c46e7171f7f3b4da095ecb7fd14f6302dd5bb862503346"}}));
+        
+        // Clean up any unwanted localStorage items
+        localStorage.removeItem('Paytm-MBus-RecentSearches');
+        console.log('✅ localStorage configuration completed');
+      }
+    });
     
     // Refresh browser after clearing storage (must be outside browser.execute)
     // await browser.refresh();
