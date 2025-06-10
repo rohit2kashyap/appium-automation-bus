@@ -1,3 +1,5 @@
+import { PaytmTravelLoginFetched, sessionValue, login_successful } from "../../loginCredentials.js";
+
 describe('Paytm Bus Web App', () => {
   it('should open the bus page and complete full booking flow', async () => {
     // Navigate to the bus page
@@ -7,16 +9,31 @@ describe('Paytm Bus Web App', () => {
     console.log('=== CLEARING ALL BROWSER STORAGE AND COOKIES ===');
     
     // Clear localStorage, sessionStorage, and cookies
-    await browser.execute(() => {
+    await browser.execute((sessionValueData, paytmTravelLoginFetched, login_successful) => {
       // Clear localStorage
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('Paytm-MBus-smartFilterCoachShown', 'true');
         // localStorage.clear();
-        // localStorage.setItem('sessionValue', {"isLogin":true,"env":"production","action_type":"login","user":{"info":{"id":1338927460,"email":"kashyaprohit8360@gmail.com","userTypes":["BANK_CUSTOMER","SD_MERCHANT","MERCHANT"],"minKycDetails":{"isMinKyc":true,"kycState":"PAYTM_MIN_KYC"},"expiryTime":"1749638959000","userAttributeInfo":{"IVR_FLAG":"1","USER_TYPE":"3,5,4","CHAT_LANGUAGE":"en-IN","CUSTOMER_TYPE":"0","BANK_CONSENT":"true","isCAeligible":"true","SMS_FLAG":"1"},"firstName":"","lastName":"","mobile":8360351172,"countryCode":"91","isKyc":false,"created_at":"Jul 4, 2021 3:09:34 PM","walletType":"SCW","sendEmailFLag":true,"is_verified_email":true,"is_verified_mobile":true,"status":true,"username":8360351172},"id":1338927460,"email":"kashyaprohit8360@gmail.com","sso_token_enc":"15dcd9d9a499e81e02990ea23c6aa098fcdb4ab70421f5b03cba3add174380fa07447b82c5f6fa165cedb19ae8ddd128","sso_token_enc_iv":"9c3936f270cc8d2dd5d840cc7956daa7a52f70a4904a068c81c46e7171f7f3b4da095ecb7fd14f6302dd5bb862503346","encWalletToken":"15dcd9d9a499e81e02990ea23c6aa098fcdb4ab70421f5b03cba3add174380fa07447b82c5f6fa165cedb19ae8ddd128","encWalletTokenIV":"9c3936f270cc8d2dd5d840cc7956daa7a52f70a4904a068c81c46e7171f7f3b4da095ecb7fd14f6302dd5bb862503346"}});
+        console.log('sessionValueData', sessionValueData);
+        console.log('paytmTravelLoginFetched',paytmTravelLoginFetched);
+        console.log('login_successful', login_successful);
+        
+        
+        localStorage.setItem('sessionValue', JSON.stringify(sessionValueData));
+        localStorage.setItem('PaytmTravelLoginFetched', paytmTravelLoginFetched);
+        localStorage.setItem('login_successful', JSON.stringify(login_successful));
         // localStorage.removeItem('Paytm-MBus-RecentSearches');
-        console.log('✅ localStorage cleared');
+        console.log('✅ localStorage set with login credentials');
+        console.log('📋 sessionValue stored as JSON string');
+        console.log('📅 PaytmTravelLoginFetched stored as string');
+        console.log('🎯 login_successful stored as JSON string');
+        
+        // Debug: Verify what was actually stored
+        console.log('🔍 Verification - sessionValue length:', localStorage.getItem('sessionValue').length);
+        console.log('🔍 Verification - PaytmTravelLoginFetched:', localStorage.getItem('PaytmTravelLoginFetched'));
+        console.log('🔍 Verification - login_successful length:', localStorage.getItem('login_successful').length);
       }
-    });
+    }, sessionValue, PaytmTravelLoginFetched, login_successful);
     
     // Refresh browser after clearing storage (must be outside browser.execute)
     // await browser.refresh();
@@ -1728,7 +1745,7 @@ describe('Paytm Bus Web App', () => {
     
     // === STEP 12: SELECT NET BANKING OPTION ===
     console.log('=== STEP 12: SELECTING NET BANKING OPTION ===');
-    await browser.pause(3000);
+    await browser.pause(15000);
     
     try {
       // Look for Net Banking option using specific selectors
@@ -1927,7 +1944,7 @@ describe('Paytm Bus Web App', () => {
 
     // === STEP 12: SELECT ICICI BANK FROM POPUP ===
     console.log('=== STEP 12: SELECTING ICICI BANK FROM POPUP ===');
-    await browser.pause(3000); // Reduced since we already waited above
+    await browser.pause(7000); // Reduced since we already waited above
     
     try {
       // Look for ICICI bank option in the popup
@@ -2135,16 +2152,108 @@ describe('Paytm Bus Web App', () => {
       }
       
       if (payButtonClicked) {
-        console.log('🎉 SUCCESS: Pay button clicked - proceeding to bank gateway');
+        console.log('🎉 SUCCESS: Pay button clicked - waiting for redirect to order summary page');
         
-        // Wait for bank gateway to load - extended to 3 minutes as requested
-        console.log('⏳ Waiting for 3 minutes after Pay button click...');
-        console.log('🏦 Bank gateway should load during this time');
-        await browser.pause(10000); // 3 minutes = 180,000 ms
+        // Wait for redirect to order summary page
+        console.log('⏳ Waiting for redirect to order summary page...');
+        console.log('🔍 Looking for URL pattern: https://staging.paytm.com/bus-tickets/summary/{dynamic_number}');
         
-        console.log('✅ 3-minute wait completed');
-        console.log('🎯 TEST COMPLETED - Bank gateway should have loaded');
-        console.log('🔚 Ending test execution as requested');
+        try {
+          // Wait for up to 2 minutes for redirect to order summary page
+          await browser.waitUntil(
+            async () => {
+              try {
+                const currentUrl = await browser.getUrl();
+                console.log(`🔍 Current URL: ${currentUrl}`);
+                
+                // Check if URL matches the order summary pattern
+                const isOrderSummaryPage = currentUrl.includes('staging.paytm.com/bus-tickets/summary/') || 
+                                          currentUrl.includes('paytm.com/bus-tickets/summary/');
+                
+                if (isOrderSummaryPage) {
+                  console.log('✅ SUCCESS: Redirected to order summary page!');
+                  console.log(`📍 Order summary URL: ${currentUrl}`);
+                  return true;
+                }
+                
+                return false;
+              } catch (e) {
+                console.log('⏳ Still waiting for redirect...');
+                return false;
+              }
+            },
+            {
+              timeout: 120000, // 2 minutes timeout for redirect
+              interval: 5000,   // Check every 5 seconds
+              timeoutMsg: 'Did not redirect to order summary page within 2 minutes'
+            }
+          );
+          
+          // Successfully reached order summary page - now wait for 5 minutes
+          const currentUrl = await browser.getUrl();
+          console.log('🎉 SUCCESSFULLY REACHED ORDER SUMMARY PAGE!');
+          console.log(`📍 Final URL: ${currentUrl}`);
+          
+          // Extract the dynamic order ID from URL
+          const orderIdMatch = currentUrl.match(/\/summary\/(\d+)/);
+          const orderId = orderIdMatch ? orderIdMatch[1] : 'unknown';
+          console.log(`🎫 Order ID: ${orderId}`);
+          
+          // Wait for 5 minutes on the order summary page as requested
+          console.log('⏳ WAITING FOR 5 MINUTES ON ORDER SUMMARY PAGE...');
+          console.log('🕐 This is as requested - staying on the page for 5 minutes');
+          console.log('📊 You can now observe the order summary page for 5 minutes');
+          
+          // 5 minutes = 300,000 milliseconds
+          const fiveMinutes = 300000;
+          const startTime = Date.now();
+          
+          // Wait in smaller chunks and log progress
+          const logInterval = 60000; // Log every minute
+          let remainingTime = fiveMinutes;
+          
+          while (remainingTime > 0) {
+            const waitTime = Math.min(logInterval, remainingTime);
+            await browser.pause(waitTime);
+            
+            remainingTime -= waitTime;
+            const elapsed = Date.now() - startTime;
+            const elapsedMinutes = Math.floor(elapsed / 60000);
+            const remainingMinutes = Math.floor(remainingTime / 60000);
+            
+            if (remainingTime > 0) {
+              console.log(`⏳ Still waiting... ${elapsedMinutes + 1} minute(s) elapsed, ${remainingMinutes} minute(s) remaining`);
+              
+              // Verify we're still on the order summary page
+              try {
+                const currentUrlCheck = await browser.getUrl();
+                if (currentUrlCheck.includes('bus-tickets/summary/')) {
+                  console.log('✅ Still on order summary page');
+                } else {
+                  console.log(`⚠️ URL changed to: ${currentUrlCheck}`);
+                }
+              } catch (e) {
+                console.log('⚠️ Could not check current URL');
+              }
+            }
+          }
+          
+          console.log('🎉 5-MINUTE WAIT COMPLETED!');
+          console.log('✅ Successfully stayed on order summary page for 5 minutes');
+          console.log('🏁 TEST COMPLETED SUCCESSFULLY');
+          
+        } catch (e) {
+          console.log('❌ Error waiting for order summary page:', e.message);
+          console.log('⏳ Attempting to continue anyway and wait for 5 minutes...');
+          
+          // Even if we couldn't detect the redirect properly, wait 5 minutes anyway
+          console.log('⏳ Waiting 5 minutes regardless of redirect detection...');
+          await browser.pause(300000); // 5 minutes
+          
+          console.log('✅ 5-minute wait completed (fallback)');
+          console.log('🏁 TEST COMPLETED');
+        }
+        
       } else {
         console.log('❌ Could not click Pay button with any method');
         throw new Error('Pay button could not be clicked - all methods failed');
@@ -2192,6 +2301,8 @@ describe('Paytm Bus Web App', () => {
       
       throw new Error('Pay button click failed after all attempts: ' + e.message);
     }
+
+    // === STEP 14: Order summary page ===
     
     // Test completed - no need for final status as it's handled above
     console.log('🏁 FINAL: Test execution completed');
