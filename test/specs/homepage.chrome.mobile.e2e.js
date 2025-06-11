@@ -5,44 +5,25 @@ describe('Paytm Bus Web App', () => {
     // Navigate to the bus page
     await browser.url('/bus');  // baseUrl + /bus = http://fe.paytm.com:3001/bus
     
-    // Clear all browser storage and cookies before executing the test
-    console.log('=== CLEARING ALL BROWSER STORAGE AND COOKIES ===');
-    
-    // Clear localStorage, sessionStorage, and cookies
     await browser.execute((sessionValueData, paytmTravelLoginFetched, login_successful) => {
-      // Clear localStorage
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('Paytm-MBus-smartFilterCoachShown', 'true');
         // localStorage.clear();
-        console.log('sessionValueData', sessionValueData);
-        console.log('paytmTravelLoginFetched',paytmTravelLoginFetched);
-        console.log('login_successful', login_successful);
         
         
         localStorage.setItem('sessionValue', JSON.stringify(sessionValueData));
-        localStorage.setItem('PaytmTravelLoginFetched', paytmTravelLoginFetched);
+        localStorage.setItem('PaytmTravelLoginFetched', JSON.stringify(paytmTravelLoginFetched));
         localStorage.setItem('login_successful', JSON.stringify(login_successful));
         // localStorage.removeItem('Paytm-MBus-RecentSearches');
         console.log('✅ localStorage set with login credentials');
         console.log('📋 sessionValue stored as JSON string');
         console.log('📅 PaytmTravelLoginFetched stored as string');
         console.log('🎯 login_successful stored as JSON string');
-        
-        // Debug: Verify what was actually stored
-        console.log('🔍 Verification - sessionValue length:', localStorage.getItem('sessionValue').length);
-        console.log('🔍 Verification - PaytmTravelLoginFetched:', localStorage.getItem('PaytmTravelLoginFetched'));
-        console.log('🔍 Verification - login_successful length:', localStorage.getItem('login_successful').length);
       }
     }, sessionValue, PaytmTravelLoginFetched, login_successful);
     
-    // Refresh browser after clearing storage (must be outside browser.execute)
-    // await browser.refresh();
+    await browser.refresh();
     console.log('✅ Browser refreshed to reflect storage changes');
-    
-    // Clear all cookies
-
-    
-    console.log('🧹 Browser storage cleanup completed');
     
     const title = await browser.getTitle();
     console.log('Page Title:', title);
@@ -1130,7 +1111,7 @@ describe('Paytm Bus Web App', () => {
     }
     
     // Wait for page transition
-    await browser.pause(20000); // Reduced from 10000 to 5000ms
+    await browser.pause(10000); // Reduced from 10000 to 5000ms
     
     // === STEP 7: WAIT FOR MANUAL LOGIN ===
     console.log('=== STEP 7: WAITING FOR MANUAL LOGIN ===');
@@ -1215,7 +1196,7 @@ describe('Paytm Bus Web App', () => {
     
     // === STEP 8: SELECT FIRST PASSENGER ===
     console.log('=== STEP 8: SELECTING FIRST PASSENGER ===');
-    await browser.pause(3000);
+    await browser.pause(2000);
     
     try {
       console.log('🔍 Looking for passenger containers...');
