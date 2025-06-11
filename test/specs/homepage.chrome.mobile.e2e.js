@@ -20,7 +20,7 @@ describe('Paytm Bus Web App', () => {
         
         
         localStorage.setItem('sessionValue', JSON.stringify(sessionValueData));
-        localStorage.setItem('PaytmTravelLoginFetched', paytmTravelLoginFetched);
+        localStorage.setItem('PaytmTravelLoginFetched', JSON.stringify(paytmTravelLoginFetched));
         localStorage.setItem('login_successful', JSON.stringify(login_successful));
         // localStorage.removeItem('Paytm-MBus-RecentSearches');
         console.log('✅ localStorage set with login credentials');
@@ -36,7 +36,7 @@ describe('Paytm Bus Web App', () => {
     }, sessionValue, PaytmTravelLoginFetched, login_successful);
     
     // Refresh browser after clearing storage (must be outside browser.execute)
-    // await browser.refresh();
+    await browser.refresh();
     console.log('✅ Browser refreshed to reflect storage changes');
     
     // Clear all cookies
