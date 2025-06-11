@@ -44,7 +44,7 @@ export const sessionValue = {
   },
 };
 
-export const PaytmTravelLoginFetched = "2025-09-10T17:08:49.418Z";
+export const PaytmTravelLoginFetched = "2025-09-11T09:03:44.456Z";
 
 export const login_successful = {
   event_category: "loginVerify",

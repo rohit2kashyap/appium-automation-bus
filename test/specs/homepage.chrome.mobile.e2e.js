@@ -22,6 +22,27 @@ describe('Paytm Bus Web App', () => {
       }
     }, sessionValue, PaytmTravelLoginFetched, login_successful);
     
+    // Set XSRF-TOKEN and connect.msid cookies
+    await browser.setCookies([
+      {
+        name: 'XSRF-TOKEN',
+        value: '2brqyVpf-PoJUfT1PciK3YWbBNch5Zi_7QAU',
+        domain: 'tickets.paytm.com',
+        secure: true,
+        sameSite: 'strict'
+      },
+      {
+        name: 'connect.msid',
+        value: 's%3Ak0IAPmnmMUil-JRDvqyVGJ5aHfokG7Ja.r62GGh3Vvh7NObUzspFyRDNaA0C5yTaErbK3Sv%2BTWEI',
+        domain: 'tickets.paytm.com',
+        path: '/',
+        sameSite: 'strict',
+        httpOnly: true,
+        secure: true
+      }
+    ]);
+    console.log('✅ XSRF-TOKEN and connect.msid cookies set successfully');
+    
     await browser.refresh();
     console.log('✅ Browser refreshed to reflect storage changes');
     
@@ -1177,7 +1198,7 @@ describe('Paytm Bus Web App', () => {
     
     // Additional wait for page to fully settle after login detection
     console.log('⏳ Allowing page to fully settle after login detection...');
-    await browser.pause(3000);
+    await browser.pause(1000);
     
     // === CHROME MOBILE: NO PROCEED BUTTON AFTER LOGIN ===
     console.log('=== CHROME MOBILE: LOGIN COMPLETED - PROCEEDING DIRECTLY TO PASSENGER SELECTION ===');
